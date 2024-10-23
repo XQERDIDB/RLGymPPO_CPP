@@ -42,5 +42,8 @@ namespace RLGPC {
 
 		float ratingInc = 5; // Rating increment scale per-goal
 		float initialRating = 1000; // Initial rating of the current version
+
+		// Update the ratings of older versions (doesn't save them though)
+		bool updateOldRatings = false;
 	};
 }

@@ -140,10 +140,10 @@ void RunThread(
 				ratingMutex->lock();
 				if (scoringPolicy == curPolicy) {
 					// Current policy scored
-					self->UpdateRatings(self->curRating, self->oldRatings[game.oldPolicyIndex], true, true, modeName);
+					self->UpdateRatings(self->curRating, self->oldRatings[game.oldPolicyIndex], true, self->config.updateOldRatings, modeName);
 				} else {
 					// Old policy scored
-					self->UpdateRatings(self->oldRatings[game.oldPolicyIndex], self->curRating, true, true, modeName);
+					self->UpdateRatings(self->oldRatings[game.oldPolicyIndex], self->curRating, self->config.updateOldRatings, true, modeName);
 				}
 				ratingMutex->unlock();
 			}
