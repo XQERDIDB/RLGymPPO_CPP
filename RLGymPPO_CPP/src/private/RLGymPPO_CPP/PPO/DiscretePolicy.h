@@ -13,7 +13,9 @@ namespace RLGPC {
 		int inputAmount;
 		int actionAmount;
 		IList layerSizes;
+
 		float temperature;
+		torch::Tensor logitBonuses;
 
 		// Min probability that an action will be taken
 		constexpr static float ACTION_MIN_PROB = 1e-11;
@@ -25,8 +27,15 @@ namespace RLGPC {
 		void CopyTo(DiscretePolicy& to);
 
 		torch::Tensor GetOutput(torch::Tensor input) {
+			auto baseOutput = seq->forward(input) / temperature;
+
+			if (logitBonuses.defined()) {
+				auto outputRange = baseOutput.max() - baseOutput.min();
+				baseOutput = baseOutput + (logitBonuses * outputRange);
+			}
+
 			return torch::nn::functional::softmax(
-				seq->forward(input) / temperature,
+				baseOutput,
 				torch::nn::functional::SoftmaxFuncOptions(-1)
 			);
 		}

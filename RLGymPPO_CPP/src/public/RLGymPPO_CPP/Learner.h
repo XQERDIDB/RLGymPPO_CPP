@@ -41,6 +41,8 @@ namespace RLGPC {
 
 		void UpdateLearningRates(float policyLR, float criticLR);
 
+        void SetLogitBonuses(RLGSC::FList bonuses);
+
 		std::vector<Report> GetAllGameMetrics();
 
 		void Save();

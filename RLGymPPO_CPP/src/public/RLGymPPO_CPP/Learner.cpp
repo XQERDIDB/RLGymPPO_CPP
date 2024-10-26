@@ -1,4 +1,5 @@
 #include "Learner.h"
+#include "Learner.h"
 
 #include "../../private/RLGymPPO_CPP/Util/SkillTracker.h"
 
@@ -704,6 +705,13 @@ void RLGPC::Learner::AddNewExperience(GameTrajectory& gameTraj, Report& report) 
 
 void RLGPC::Learner::UpdateLearningRates(float policyLR, float criticLR) {
 	ppo->UpdateLearningRates(policyLR, criticLR);
+}
+
+void RLGPC::Learner::SetLogitBonuses(RLGSC::FList bonuses) {
+	RG_ASSERT(bonuses.size() == actionAmount);
+	ppo->policy->logitBonuses = torch::tensor(bonuses, ppo->policy->device);
+	if (ppo->policyHalf)
+		ppo->policyHalf->logitBonuses = torch::tensor(bonuses, ppo->policy->device);
 }
 
 std::vector<RLGPC::Report> RLGPC::Learner::GetAllGameMetrics() {
