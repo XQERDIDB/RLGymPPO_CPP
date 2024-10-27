@@ -41,6 +41,21 @@ void RLGPC::DiscretePolicy::CopyTo(DiscretePolicy& to) {
 	}
 }
 
+torch::Tensor RLGPC::DiscretePolicy::GetOutput(torch::Tensor input) {
+	auto baseOutput = seq->forward(input) / temperature;
+	auto result = torch::nn::functional::softmax(
+		baseOutput,
+		torch::nn::functional::SoftmaxFuncOptions(-1)
+	);
+
+	if (actionProbBonuses.defined()) {
+		result = result + actionProbBonuses.view({ 1, -1 });
+		result = result / result.sum(-1).view({ -1, 1 });
+	}
+
+	return result;
+}
+
 torch::Tensor RLGPC::DiscretePolicy::GetActionProbs(torch::Tensor obs) {
 	auto probs = GetOutput(obs);
 	probs = probs.view({ -1, actionAmount });
@@ -69,7 +84,13 @@ RLGPC::DiscretePolicy::BackpropResult RLGPC::DiscretePolicy::GetBackpropData(tor
 	// Compute log probs and entropy
 	auto logProbs = torch::log(probs);
 	auto actionLogProbs = logProbs.gather(-1, acts);
-	auto entropy = -(logProbs * probs).sum(-1);
+	auto entropy = -(logProbs * probs);
+
+	if (actionEntropyScales.defined()) {
+		entropy = entropy * actionEntropyScales.view({ 1, -1 });
+	}
+
+	entropy = entropy.sum(-1);
 
 	return BackpropResult{ actionLogProbs.to(device, true), entropy.to(device).mean() };
 }

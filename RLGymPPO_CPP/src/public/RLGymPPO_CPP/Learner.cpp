@@ -707,11 +707,18 @@ void RLGPC::Learner::UpdateLearningRates(float policyLR, float criticLR) {
 	ppo->UpdateLearningRates(policyLR, criticLR);
 }
 
-void RLGPC::Learner::SetLogitBonuses(RLGSC::FList bonuses) {
-	RG_ASSERT(bonuses.size() == actionAmount);
-	ppo->policy->logitBonuses = torch::tensor(bonuses, ppo->policy->device);
+void RLGPC::Learner::SetActionEntropyScales(RLGSC::FList newVals) {
+	RG_ASSERT(newVals.size() == actionAmount);
+	ppo->policy->actionEntropyScales = torch::tensor(newVals, ppo->policy->device);
 	if (ppo->policyHalf)
-		ppo->policyHalf->logitBonuses = torch::tensor(bonuses, ppo->policy->device);
+		ppo->policyHalf->actionEntropyScales = torch::tensor(newVals, ppo->policy->device);
+}
+
+void RLGPC::Learner::SetActionProbBonuses(RLGSC::FList newVals) {
+	RG_ASSERT(newVals.size() == actionAmount);
+	ppo->policy->actionProbBonuses = torch::tensor(newVals, ppo->policy->device);
+	if (ppo->policyHalf)
+		ppo->policyHalf->actionProbBonuses = torch::tensor(newVals, ppo->policy->device);
 }
 
 std::vector<RLGPC::Report> RLGPC::Learner::GetAllGameMetrics() {
