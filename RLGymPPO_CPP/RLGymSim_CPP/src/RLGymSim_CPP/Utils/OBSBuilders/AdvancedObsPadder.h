@@ -1,5 +1,6 @@
 #pragma once
 #include "OBSBuilder.h"
+#include <cmath>
 
 namespace RLGSC {
 	class AdvancedObsPadder : public OBSBuilder {
